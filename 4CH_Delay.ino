@@ -11,7 +11,7 @@
 // =======================================================================================================
 //
 
-#include <Servo.h>
+#include <Servo.h> // Included in Arduino IDE
 
 //
 // =======================================================================================================
@@ -29,8 +29,6 @@
 #define RC_OUT_2 8 // CH2 output
 #define RC_OUT_3 7 // CH3 output
 #define RC_OUT_4 6 // CH4 output
-
-
 
 // Define global variables
 volatile uint8_t prev;            // remembers state of input bits from previous interrupt
@@ -70,7 +68,7 @@ Servo servo4;
 
 void setup() {
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   // Interrupt settings. See: http://www.atmel.com/Images/Atmel-42735-8-bit-AVR-Microcontroller-ATmega328-328P_Datasheet.pdf
   PCMSK1 |= B00001111; // PinChangeMaskRegister: set the mask to allow pins A0-A3 to generate interrupts (see page 94)
@@ -157,9 +155,6 @@ void driveServo1() { // Bucket
 
     // drive servo
     servo1.writeMicroseconds(servoPos);
-    //Serial.print(pulse[1]);
-    //Serial.print("  ");
-    //Serial.println(servoPos);
   }
 }
 
@@ -180,7 +175,7 @@ void driveServo2() { // Dipper
   }
 }
 
-void driveServo3() { // Dipper
+void driveServo3() { // Boom
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
@@ -203,7 +198,7 @@ void driveServo3() { // Dipper
   }
 }
 
-void driveServo4() {
+void driveServo4() { // Swing
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
