@@ -19,6 +19,6 @@ New in V 1.0:
 - WARNING! Most modern RC electronics devices are using a signal voltage of 3.3V, so you have to use the 3.3v / 8MHz version!
 
 ![](pictures/wiring.jpg)
-![](pictures/excavator.jpg)
+![](pictures/excavator.JPG)
 
 (c) 2021 TheDIYGuy999
