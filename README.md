@@ -18,7 +18,7 @@ New in V 1.0:
 - The Pro Mini is supplied by the servo wires via the GND and RAW pins
 - WARNING! Most modern RC electronics devices are using a signal voltage of 3.3V, so you have to use the 3.3v / 8MHz version!
 
-![](pictures/wiring.jpg)
+![](pictures/wiring.JPG)
 ![](pictures/excavator.JPG)
 
 (c) 2021 TheDIYGuy999
