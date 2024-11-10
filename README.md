@@ -8,6 +8,10 @@
 
 See: https://www.youtube.com/playlist?list=PLGO5EJJClJBCjIvu8frS7LrEU3H2Yz_so
 
+New in V 1.1:
+- Version for burnie222rc vulpa 505 (Volvo EC550EL) added
+- Bug in CH3 output fixed
+
 New in V 1.0:
 - Initial commit
 

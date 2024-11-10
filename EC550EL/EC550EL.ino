@@ -11,7 +11,7 @@
 // =======================================================================================================
 //
 
-#include <Servo.h> // Included in Arduino IDE
+#include <Servo.h>  // Included in Arduino IDE
 
 //
 // =======================================================================================================
@@ -20,15 +20,15 @@
 //
 
 // RC pins
-#define RC_IN_1 A0 // CH1 input
-#define RC_IN_2 A1 // CH2 input
-#define RC_IN_3 A2 // CH3 input
-#define RC_IN_4 A3 // CH4 input
+#define RC_IN_1 A0  // CH1 input
+#define RC_IN_2 A1  // CH2 input
+#define RC_IN_3 A2  // CH3 input
+#define RC_IN_4 A3  // CH4 input
 
-#define RC_OUT_1 9 // CH1 output
-#define RC_OUT_2 8 // CH2 output
-#define RC_OUT_3 7 // CH3 output
-#define RC_OUT_4 6 // CH4 output
+#define RC_OUT_1 9  // CH1 output
+#define RC_OUT_2 8  // CH2 output
+#define RC_OUT_3 7  // CH3 output
+#define RC_OUT_4 6  // CH4 output
 
 // Define global variables
 volatile uint8_t prev;            // remembers state of input bits from previous interrupt
@@ -36,12 +36,10 @@ volatile uint32_t risingEdge[4];  // time of last rising edge for each channel
 volatile uint32_t uSec[4];        // the latest measured pulse width for each channel
 
 // Servo ramp times in microseconds per microsecond signal change
-const uint16_t servo1RampTime = 150; // Bucket 150
-const uint16_t servo2RampTime = 350; // Dipper 350
-const uint16_t servo3RampTime = 350; // Boom 350
-const uint16_t servo4RampTime = 1800; // Swing 1800
-
-const uint16_t servo3LiftingPoint = 1700; // Boom will drop below this point because of low pump pressure 1700
+const uint16_t servo1RampTime = 0;     // Bucket 0
+const uint16_t servo2RampTime = 100;   // Dipper 100
+const uint16_t servo3RampTime = 1000;  // Boom 1000
+const uint16_t servo4RampTime = 2000;  // Swing 2000
 
 // RC signal adjustment
 const uint16_t servoMin = 1000;
@@ -71,8 +69,8 @@ void setup() {
   //Serial.begin(9600);
 
   // Interrupt settings. See: http://www.atmel.com/Images/Atmel-42735-8-bit-AVR-Microcontroller-ATmega328-328P_Datasheet.pdf
-  PCMSK1 |= B00001111; // PinChangeMaskRegister: set the mask to allow pins A0-A3 to generate interrupts (see page 94)
-  PCICR |= B00000010;  // PinChangeInterruptControlRegister: enable interupt for port C (Interrupt Enable 2, see page 92)
+  PCMSK1 |= B00001111;  // PinChangeMaskRegister: set the mask to allow pins A0-A3 to generate interrupts (see page 94)
+  PCICR |= B00000010;   // PinChangeInterruptControlRegister: enable interupt for port C (Interrupt Enable 2, see page 92)
 
   // Servo setup
   servo1.attach(RC_OUT_1);
@@ -86,7 +84,6 @@ void setup() {
   servo2.writeMicroseconds(servoNeutral);
   servo3.writeMicroseconds(servoNeutral);
   servo4.writeMicroseconds(servoNeutral);
-
 }
 
 //
@@ -95,17 +92,16 @@ void setup() {
 // =======================================================================================================
 // Based on: http://ceptimus.co.uk/?p=66
 
-ISR(PCINT1_vect) { // one or more of pins A0-A7 have changed state
+ISR(PCINT1_vect) {  // one or more of pins A0-A7 have changed state
   uint32_t now = micros();
-  uint8_t curr = PINC; // current state of input pins A0 to A7 (we only use A0 to A3)
-  uint8_t changed = curr ^ prev; // bitwise XOR (= bit has changed)
+  uint8_t curr = PINC;            // current state of input pins A0 to A7 (we only use A0 to A3)
+  uint8_t changed = curr ^ prev;  // bitwise XOR (= bit has changed)
   uint8_t channel = 0;
-  for (uint8_t mask = B00000001; mask <= B00001000 ; mask <<= 1) { // do it with bit 0 to 3 masked
-    if (changed & mask) { // this pin has changed state
-      if (curr & mask) { // Rising edge, so remember time
+  for (uint8_t mask = B00000001; mask <= B00001000; mask <<= 1) {  // do it with bit 0 to 3 masked
+    if (changed & mask) {                                          // this pin has changed state
+      if (curr & mask) {                                           // Rising edge, so remember time
         risingEdge[channel] = now;
-      }
-      else { // Falling edge, so store pulse width
+      } else {  // Falling edge, so store pulse width
         uSec[channel] = now - risingEdge[channel];
       }
     }
@@ -141,24 +137,29 @@ void readReceiver() {
 // =======================================================================================================
 //
 
-void driveServo1() { // Bucket
+void driveServo1() {  // Bucket
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
 
-  // Ramp and limit servo position
-  if (micros() - lastFrameTime > servo1RampTime) {
-    lastFrameTime = micros();
-    if (pulse[1] < servoPos) servoPos--;
-    if (pulse[1] > servoPos) servoPos++;
-    constrain(servoPos, servoMin, servoMax);
+  if (servo1RampTime > 0) {
+    // Ramp and limit servo position
+    if (micros() - lastFrameTime > servo1RampTime) {
+      lastFrameTime = micros();
+      if (pulse[1] < servoPos) servoPos--;
+      if (pulse[1] > servoPos) servoPos++;
+      constrain(servoPos, servoMin, servoMax);
 
-    // drive servo
-    servo1.writeMicroseconds(servoPos);
+      // drive servo
+      servo1.writeMicroseconds(servoPos);
+    }
+  } else {
+    // drive servo without delay
+      servo1.writeMicroseconds(pulse[1]);
   }
 }
 
-void driveServo2() { // Dipper
+void driveServo2() {  // Dipper
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
@@ -175,11 +176,10 @@ void driveServo2() { // Dipper
   }
 }
 
-void driveServo3() { // Boom
+void driveServo3() {  // Boom
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
-  uint16_t servoOut;
 
   // Ramp and limit servo position
   if (micros() - lastFrameTime > servo3RampTime) {
@@ -188,23 +188,18 @@ void driveServo3() { // Boom
     if (pulse[3] > servoPos) servoPos++;
     constrain(servoPos, servoMin, servoMax);
 
-  // Valve offset (add dead zone upwards) to prevent boom from falling because of low pump pressure
-  if (servoPos > servo3LiftingPoint) servoOut = map(servoPos, servo3LiftingPoint, servoMax, servoNeutral, servoMax);
-  else if (servoPos < servoNeutral) servoOut = servoPos;
-  else servoOut = servoNeutral;
-
     // drive servo
-    servo3.writeMicroseconds(servoOut);
+    servo3.writeMicroseconds(servoPos);
   }
 }
 
-void driveServo4() { // Swing
+void driveServo4() {  // Swing
 
   static uint32_t lastFrameTime = micros();
   static uint16_t servoPos = servoNeutral;
 
   // Ramp and limit servo position
-  if (micros() - lastFrameTime > servo4RampTime ) {
+  if (micros() - lastFrameTime > servo4RampTime) {
     lastFrameTime = micros();
     if (pulse[4] < servoPos) servoPos--;
     if (pulse[4] > servoPos) servoPos++;
